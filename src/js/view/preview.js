@@ -5,6 +5,7 @@ define([
 
     var Preview = function(_model) {
         this.model = _model;
+        this.aspectRatioPromise = Promise.resolve(0);
 
         _model.on('change:playlistItem', onPlaylistItem, this);
         _model.on('change:mediaModel', onMediaModel, this);
@@ -50,6 +51,17 @@ define([
             var backgroundImage = '';
             if (_.isString(img)) {
                 backgroundImage = 'url("' + img + '")';
+
+                // Save the background image's width and height for resize check in view.js
+                var image = new Image();
+                image.src = img;
+                this.aspectRatioPromise = new Promise(function(resolve) {
+                    image.onload = function() {
+                        resolve(image.width / image.height);
+                    };
+                });
+            } else {
+                this.aspectRatioPromise = Promise.resolve(0);
             }
             utils.style(this.el, {
                 backgroundImage: backgroundImage
